@@ -74,7 +74,7 @@ INEP_MESTRE = '2307650'
 # Barra lateral para login
 with st.sidebar:
     st.header("🔒 Acesso Restrito")
-    st.markdown("Insira suas credenciais para acessar os dados.")
+    st.markdown("Para acessar, insira suas credenciais correspodente ao INEP da escola.")
 
     with st.form(key='login_form'):
         inep = st.text_input('INEP').strip()
