@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 # Configuração da página Streamlit
 st.set_page_config(
     page_title="Dashboard Escolar",
-    page_icon="diplomado.png",
+    page_icon="Resultados_diagnosticas/img/diplomado.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # Adicionando o logotipo na barra lateral
-logo_url = 'Logomarca da Secretaria de Educação 2021.png'
+logo_url = 'Resultados_diagnosticas/img/Logomarca da Secretaria de Educação 2021.png'
 with st.sidebar:
     st.image(logo_url, width=200)
 
@@ -27,8 +27,8 @@ def load_data(file_path):
 
 # Carregamento dos dados
 try:
-    df_login = load_data('senhas_acesso.xlsx')
-    df_dados = load_data('bd_dados.xlsx')
+    df_login = load_data('Resultados_diagnosticas/xls/senhas_acesso.xlsx')
+    df_dados = load_data('Resultados_diagnosticas/xls/bd_dados.xlsx')
     
     # Remover espaços extras nos nomes das colunas e valores
     df_login.columns = df_login.columns.str.strip()
