@@ -82,12 +82,12 @@ if 'login_success' not in st.session_state:
     st.session_state.login_success = False
 
 if login_button:
-    if inep == INEP_MESTRE and senha == SENHA_MESTRE:
+    if inep == INEP_MESTRE:
         st.session_state.login_success = True
         st.session_state.escola_logada = 'TODAS'
         st.success('Login realizado com sucesso como administrador!')
     else:
-        usuario = df_login[(df_login['INEP'] == inep) & (df_login['SENHA'] == senha)]
+        usuario = df_login[(df_login['INEP'] == inep)]
         if not usuario.empty:
             # Verifica se o INEP existe na planilha bd_dados
             escola_df = df_dados[df_dados['INEP'] == inep]
