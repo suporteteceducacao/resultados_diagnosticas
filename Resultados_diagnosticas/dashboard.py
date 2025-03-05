@@ -266,9 +266,9 @@ if st.session_state.login_success:
 
                 st.pyplot(fig)
 
-               # Botão de download do gráfico de linhas
+               # Botão de download do gráfico de barras
                 buf_line = io.BytesIO()
-                ax.bar.savefig(buf_line, format='png', bbox_inches='tight')  # Salva o gráfico em um buffer
+                fig.savefig(buf_line, format='png', bbox_inches='tight')  # Salva o gráfico em um buffer
                 buf_line.seek(0)
         
                 # Nome do arquivo com o nome da escola
@@ -276,7 +276,7 @@ if st.session_state.login_success:
         
                 # Botão de download
                 st.download_button(
-                    label="Baixar Gráfico de Linhas (PNG)",
+                    label="Baixar Gráfico de Barras (PNG)",
                     data=buf_line,
                     file_name=nome_arquivo_line,
                     mime="image/png"
