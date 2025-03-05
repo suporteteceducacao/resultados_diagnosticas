@@ -272,7 +272,7 @@ if st.session_state.login_success:
                 buf_line.seek(0)
         
                 # Nome do arquivo com o nome da escola
-                nome_arquivo_line = f"Desempenho Médio por Período - {etapa_selecionada} - {componente_selecionado}.png"
+                nome_arquivo_line = f"Desempenho Médio por Período - {etapa_selecionada} - {componente_selecionado}}.png"
         
                 # Botão de download
                 st.download_button(
