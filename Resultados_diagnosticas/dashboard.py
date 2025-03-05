@@ -29,6 +29,12 @@ def load_data(file_path):
 try:
     df_login = load_data('Resultados_diagnosticas/xls/senhas_acesso.xlsx')
     df_dados = load_data('Resultados_diagnosticas/xls/bd_dados.xlsx')
+
+    # Remover a coluna 'Unnamed: 0' se ela existir
+    if 'Unnamed: 0' in df_login.columns:
+        df_login = df_login.drop(columns=['Unnamed: 0'])
+    if 'Unnamed: 0' in df_dados.columns:
+        df_dados = df_dados.drop(columns=['Unnamed: 0'])
     
     # Remover espaços extras nos nomes das colunas e valores
     df_login.columns = df_login.columns.str.strip()
@@ -258,6 +264,22 @@ if st.session_state.login_success:
                 ax.legend()
 
                 st.pyplot(fig)
+
+               # Botão de download do gráfico de linhas
+                buf_line = io.BytesIO()
+                fig_line.savefig(buf_line, format='png', bbox_inches='tight')  # Salva o gráfico em um buffer
+                buf_line.seek(0)
+        
+                # Nome do arquivo com o nome da escola
+                nome_arquivo_line = f"Desempenho Médio por Período - {etapa_selecionada} - {componente_selecionado}.png"
+        
+                # Botão de download
+                st.download_button(
+                    label="Baixar Gráfico de Linhas (PNG)",
+                    data=buf_line,
+                    file_name=nome_arquivo_line,
+                    mime="image/png"
+                )
             else:
                 st.write("Não há dados disponíveis para os filtros selecionados.")
         else:
