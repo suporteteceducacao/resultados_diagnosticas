@@ -268,7 +268,7 @@ if st.session_state.login_success:
 
                # Botão de download do gráfico de linhas
                 buf_line = io.BytesIO()
-                fig_line.savefig(buf_line, format='png', bbox_inches='tight')  # Salva o gráfico em um buffer
+                ax.bar.savefig(buf_line, format='png', bbox_inches='tight')  # Salva o gráfico em um buffer
                 buf_line.seek(0)
         
                 # Nome do arquivo com o nome da escola
