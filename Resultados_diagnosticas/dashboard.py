@@ -34,8 +34,6 @@ try:
     df_login.columns = df_login.columns.str.strip()
     df_dados.columns = df_dados.columns.str.strip()
     df_login['INEP'] = df_login['INEP'].astype(str).str.strip()
-    df_login['SENHA'] = df_login['SENHA'].astype(str).str.strip()
-    df_dados['INEP'] = df_dados['INEP'].astype(str).str.strip()
 
     # Formatar a coluna 'EDIÇÃO' corretamente
     df_dados['EDIÇÃO'] = df_dados['EDIÇÃO'].astype(float).map(lambda x: f"{x:.1f}")
@@ -68,7 +66,6 @@ def formatar_variacao(valor, eh_percentual=False):
         return f'<p style="color:{cor};">{sinal} {valor:.2f}</p>'
 
 # Credenciais mestre
-SENHA_MESTRE = '2307650'
 INEP_MESTRE = '2307650'
 
 # Barra lateral para login
@@ -78,7 +75,6 @@ with st.sidebar:
 
     with st.form(key='login_form'):
         inep = st.text_input('INEP').strip()
-        senha = st.text_input('Senha', type='password').strip()
         login_button = st.form_submit_button('Login')
 
 # Verificação de login
@@ -86,19 +82,19 @@ if 'login_success' not in st.session_state:
     st.session_state.login_success = False
 
 if login_button:
-    if inep == INEP_MESTRE and senha == SENHA_MESTRE:
+    if inep == INEP_MESTRE:
         st.session_state.login_success = True
         st.session_state.escola_logada = 'TODAS'
         st.success('Login realizado com sucesso como administrador!')
     else:
-        usuario = df_login[(df_login['INEP'] == inep) & (df_login['SENHA'] == senha)]
+        usuario = df_login[(df_login['INEP'] == inep)]
         if not usuario.empty:
             st.session_state.login_success = True
             st.session_state.escola_logada = inep
             nome_escola = df_dados[df_dados['INEP'] == inep]['ESCOLA'].iloc[0]  # Pega o nome da escola
             st.success(f'Login realizado com sucesso! Bem-vindo, {nome_escola}!')
         else:
-            st.error('INEP ou Senha incorretos.')
+            st.error('INEP incorreto.')
             st.session_state.login_success = False
 
 # Exibir dashboard após login
