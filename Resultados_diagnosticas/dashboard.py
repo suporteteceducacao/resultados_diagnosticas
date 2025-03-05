@@ -82,19 +82,25 @@ if 'login_success' not in st.session_state:
     st.session_state.login_success = False
 
 if login_button:
-    if inep == INEP_MESTRE:
+    if inep == INEP_MESTRE and senha == SENHA_MESTRE:
         st.session_state.login_success = True
         st.session_state.escola_logada = 'TODAS'
         st.success('Login realizado com sucesso como administrador!')
     else:
-        usuario = df_login[(df_login['INEP'] == inep)]
+        usuario = df_login[(df_login['INEP'] == inep) & (df_login['SENHA'] == senha)]
         if not usuario.empty:
-            st.session_state.login_success = True
-            st.session_state.escola_logada = inep
-            nome_escola = df_dados[df_dados['INEP'] == inep]['ESCOLA'].iloc[0]  # Pega o nome da escola
-            st.success(f'Login realizado com sucesso! Bem-vindo, {nome_escola}!')
+            # Verifica se o INEP existe na planilha bd_dados
+            escola_df = df_dados[df_dados['INEP'] == inep]
+            if not escola_df.empty:
+                st.session_state.login_success = True
+                st.session_state.escola_logada = inep
+                nome_escola = escola_df['ESCOLA'].iloc[0]  # Pega o nome da escola
+                st.success(f'Login realizado com sucesso! Bem-vindo, {nome_escola}!')
+            else:
+                st.error('INEP não encontrado na base de dados.')
+                st.session_state.login_success = False
         else:
-            st.error('INEP incorreto.')
+            st.error('INEP ou Senha incorretos.')
             st.session_state.login_success = False
 
 # Exibir dashboard após login
