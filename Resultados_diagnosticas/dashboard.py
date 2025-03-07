@@ -261,6 +261,9 @@ if st.session_state.login_success:
                     tamanho_grafico = (8, 4)  # Tamanho do gráfico (pode ser modificado)
                     fig, ax = plt.subplots(figsize=tamanho_grafico)
 
+                    # Ordenar os dados por EDIÇÃO antes de plotar
+                    df_filtrado_ordenado = df_filtrado.sort_values(by='EDIÇÃO')
+
                     for periodo, cor in cores.items():
                         dados_periodo = df_filtrado[df_filtrado['PERIODO'] == periodo]
                         barras = ax.bar(dados_periodo['EDIÇÃO'], dados_periodo['DESEMPENHO_MEDIO'], color=cor, label=periodo)
