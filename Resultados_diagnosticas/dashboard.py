@@ -253,21 +253,25 @@ if st.session_state.login_success:
             if etapa_selecionada != 'TODAS' and componente_selecionado != 'TODOS':
                 if not df_filtrado.empty:
                     st.subheader(f"Desempenho Médio por Período - {etapa_selecionada} - {componente_selecionado}")
-
+            
                     # Configuração das cores das barras
                     cores = {'CICLO 1': 'skyblue', 'CICLO 2': 'lightgreen'}  # Cores podem ser modificadas aqui
-
+            
                     # Ajuste o tamanho da figura aqui (largura, altura)
                     tamanho_grafico = (8, 4)  # Tamanho do gráfico (pode ser modificado)
                     fig, ax = plt.subplots(figsize=tamanho_grafico)
-
+            
+                    # Converter as edições para float para ordenação correta
+                    df_filtrado['EDIÇÃO_FLOAT'] = df_filtrado['EDIÇÃO'].apply(lambda x: float(x))
+            
                     # Ordenar os dados por EDIÇÃO antes de plotar
-                    df_filtrado_ordenado = df_filtrado.sort_values(by='EDIÇÃO')
-
+                    df_filtrado_ordenado = df_filtrado.sort_values(by='EDIÇÃO_FLOAT')
+            
+                    # Plotar os dados ordenados
                     for periodo, cor in cores.items():
-                        dados_periodo = df_filtrado[df_filtrado['PERIODO'] == periodo]
+                        dados_periodo = df_filtrado_ordenado[df_filtrado_ordenado['PERIODO'] == periodo]
                         barras = ax.bar(dados_periodo['EDIÇÃO'], dados_periodo['DESEMPENHO_MEDIO'], color=cor, label=periodo)
-
+            
                         # Adicionar rótulos de desempenho médio nas barras
                         for barra in barras:
                             altura = barra.get_height()
@@ -280,14 +284,14 @@ if st.session_state.login_success:
                                 color='blue',  # Cor do rótulo
                                 fontsize=10  # Tamanho da fonte
                             )
-
+            
                     # Configuração dos rótulos dos eixos
                     ax.set_xlabel('Edição', color='blue', fontsize=12)  # Rótulo do eixo X
                     ax.set_ylabel('Desempenho Médio', color='blue', fontsize=12)  # Rótulo do eixo Y
-                    ax.tick_params(axis='x', colors='blue', labelsize=10)  # Configuração dos ticks do eixo X
+                    ax.tick_params(axis='x', colors='blue', labelsize=10, rotation=45)  # Configuração dos ticks do eixo X
                     ax.tick_params(axis='y', colors='blue', labelsize=10)  # Configuração dos ticks do eixo Y
                     ax.legend()
-
+            
                     # Exibir o gráfico
                     st.pyplot(fig)
 
