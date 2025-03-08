@@ -145,7 +145,7 @@ if st.session_state.login_success:
         st.warning("Não há dados disponíveis para esta escola.")
     else:
         # Cria duas abas: uma para os resultados das avaliações e outra para a alfabetização
-        tab1, tab2 = st.tabs(["AVALIAÇÃO DIAGNÓSTICA MUNICIPAL", "AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO"])
+        tab1, tab2, tab3 = st.tabs(["AVALIAÇÃO DIAGNÓSTICA MUNICIPAL", "AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO", "REGIAO"])
 
         with tab1:
             # Classificar edições e separar por ciclos
@@ -411,18 +411,6 @@ if st.session_state.login_success:
             else:
                 st.warning("Não há dados disponíveis para o percentual de alfabetização.")
             # ... (código original anterior)
-
-    if df_escola.empty:
-        st.warning("Não há dados disponíveis para esta escola.")
-    else:
-        # Cria três abas: uma para os resultados das avaliações, outra para a alfabetização e outra para a região
-        tab1, tab2, tab3 = st.tabs(["AVALIAÇÃO DIAGNÓSTICA MUNICIPAL", "AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO", "REGIAO"])
-
-        with tab1:
-            # ... (código original da aba AVALIAÇÃO DIAGNÓSTICA MUNICIPAL)
-
-        with tab2:
-            # ... (código original da aba AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO)
 
         with tab3:
             # Nova aba REGIAO
