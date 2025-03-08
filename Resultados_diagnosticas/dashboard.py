@@ -28,7 +28,7 @@ def load_data(file_path):
 
 # Carregamento dos dados
 try:
-    df_login = load_data('Resultados_diagnosticas/xls/senhas_acesso.xlsx')
+    df_login = load_data('senhas_acesso.xlsx')
     df_dados = load_data('Resultados_diagnosticas/xls/bd_dados.xlsx')
     df_ama = load_data('Resultados_diagnosticas/xls/bd_ama.xlsx')  # Carrega a nova tabela de alfabetização
     
@@ -260,6 +260,14 @@ if st.session_state.login_success:
                     # Ajuste o tamanho da figura aqui (largura, altura)
                     tamanho_grafico = (8, 4)  # Tamanho do gráfico (pode ser modificado)
                     fig, ax = plt.subplots(figsize=tamanho_grafico)
+
+                    # Adicionar título dentro da figura
+                    ax.set_title(
+                        f"Desempenho Médio por Período - {etapa_selecionada} - {componente_selecionado}",
+                        fontsize=12,  # Tamanho da fonte
+                        fontweight='bold',  # Negrito
+                        pad=20  # Espaçamento entre o título e o gráfico
+                    )
             
                     # Converter as edições para float para ordenação correta
                     df_filtrado['EDIÇÃO_FLOAT'] = df_filtrado['EDIÇÃO'].apply(lambda x: float(x))
@@ -309,6 +317,80 @@ if st.session_state.login_success:
                     st.write("Não há dados disponíveis para os filtros selecionados.")
             else:
                 st.info("Os gráficos são exibidos apenas quando uma ETAPA e um COMPONENTE CURRICULAR específicos são selecionados.")
+                
+                # ... (código original anterior)
+
+# Inicialização do session_state
+if 'escola_logada' not in st.session_state:
+    st.session_state.escola_logada = None  # Inicializa como None
+
+# Exibir gráfico de desempenho médio por edição
+if st.session_state.escola_logada == 'TODAS' or st.session_state.escola_logada is not None:
+    if st.session_state.escola_logada == 'TODAS':
+        # INEP mestre: mostra todas as edições
+        df_edicao = df_filtrado.groupby('EDIÇÃO')['DESEMPENHO_MEDIO'].mean().reset_index()
+        titulo_grafico = "Desempenho Médio por Edição (Todas as Edições)"
+    else:
+        # Escola logada: mostra apenas as edições da região da escola logada
+        regiao_escola = df_dados[df_dados['INEP'] == st.session_state.escola_logada]['REGIAO'].iloc[0]
+        df_edicao = df_filtrado[df_filtrado['REGIAO'] == regiao_escola].groupby('EDIÇÃO')['DESEMPENHO_MEDIO'].mean().reset_index()
+        titulo_grafico = f"Desempenho Médio por Edição (Região: {regiao_escola})"
+
+    if not df_edicao.empty:
+        st.subheader(titulo_grafico)
+
+        # Configuração do gráfico de barras
+        fig_edicao, ax_edicao = plt.subplots(figsize=(10, 6))
+
+        # Adicionar título dentro da figura
+        ax_edicao.set_title(titulo_grafico, fontsize=14, fontweight='bold', pad=20)  # Título dentro do gráfico
+
+        # Cores para as barras (usando uma única cor)
+        cor_unica = 'blue'  # Ou 'green' para verde
+
+        # Plotar as barras para cada edição
+        barras_edicao = ax_edicao.bar(df_edicao['EDIÇÃO'], df_edicao['DESEMPENHO_MEDIO'], color=cor_unica)
+
+        # Adicionar rótulos de desempenho médio nas barras
+        for barra in barras_edicao:
+            altura = barra.get_height()
+            ax_edicao.text(
+                barra.get_x() + barra.get_width() / 2,  # Posição X do rótulo
+                altura + 0.05,  # Posição Y do rótulo (acima da barra)
+                f'{altura:.2f}',  # Valor do desempenho médio
+                ha='center',  # Alinhamento horizontal
+                va='bottom',  # Alinhamento vertical
+                color='black',  # Cor do rótulo
+                fontsize=14  # Tamanho da fonte
+            )
+
+        # Configuração dos rótulos dos eixos
+        ax_edicao.set_xlabel('Edição', color='blue', fontsize=14, fontweight='bold')  # Rótulo do eixo X
+        ax_edicao.set_ylabel('Desempenho Médio', color='blue', fontsize=14, fontweight='bold')  # Rótulo do eixo Y
+        ax_edicao.tick_params(axis='x', colors='blue', labelsize=12, rotation=45)  # Configuração dos ticks do eixo X
+        ax_edicao.tick_params(axis='y', colors='blue', labelsize=12)  # Configuração dos ticks do eixo Y
+
+        # Adicionar grid para melhorar a visualização
+        ax_edicao.grid(axis='y', linestyle='--', alpha=0.7)
+
+        # Ajustar o layout para evitar cortes
+        plt.tight_layout()
+
+        # Exibir o gráfico
+        st.pyplot(fig_edicao)
+
+        # Botão de download do gráfico
+        buf_edicao = io.BytesIO()
+        fig_edicao.savefig(buf_edicao, format='png', dpi=300, bbox_inches='tight')
+        buf_edicao.seek(0)
+        st.download_button(
+            label="Baixar Gráfico (PNG)",
+            data=buf_edicao,
+            file_name="grafico_desempenho_edicao.png",
+            mime="image/png"
+        )
+    else:
+        st.warning("Não há dados disponíveis para as edições selecionadas.")
 
         with tab2:
             # Exibir resultados da tabela de alfabetização
