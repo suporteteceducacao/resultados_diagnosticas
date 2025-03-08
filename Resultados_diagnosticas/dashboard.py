@@ -164,8 +164,12 @@ if st.session_state.login_success:
             componentes = df_escola['COMP_CURRICULAR'].unique().tolist()
             componentes.insert(0, 'TODOS')  # Adiciona a opção "TODOS"
 
-            etapa_selecionada = st.selectbox("Selecione a ETAPA", etapas)
-            componente_selecionado = st.selectbox("Selecione o COMPONENTE CURRICULAR", componentes)
+            # Para outros INEPs, mostrar apenas ETAPA e COMPONENTE CURRICULAR
+            col1, col2 = st.columns(2)
+            with col1:
+                    etapa_selecionada = st.selectbox("Selecione a ETAPA", etapas, key="etapa_selectbox_regiao")
+            with col2:
+                    componente_selecionado = st.selectbox("Selecione o COMPONENTE CURRICULAR", componentes, key="componente_selectbox_regiao")
 
             # Filtrar dados conforme seleção
             if etapa_selecionada == 'TODAS' and componente_selecionado == 'TODOS':
@@ -420,20 +424,7 @@ if st.session_state.login_success:
     if df_escola.empty:
         st.warning("Não há dados disponíveis para esta escola.")
     else:
-        # Cria três abas: uma para os resultados das avaliações, outra para a alfabetização e outra para a região
-        tab1, tab2, tab3 = st.tabs(["AVALIAÇÃO DIAGNÓSTICA MUNICIPAL", "AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO", "REGIAO"])
-
-        with tab1:
-            # ... (código original da aba AVALIAÇÃO DIAGNÓSTICA MUNICIPAL)
-
-        with tab2:
-            # ... (código original da aba AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO)
-
-       # ... (código original anterior)
-
-    if df_escola.empty:
-        st.warning("Não há dados disponíveis para esta escola.")
-
+        
         with tab3:
             # Nova aba REGIAO
             st.subheader("Desempenho Médio por Região e Edição")
