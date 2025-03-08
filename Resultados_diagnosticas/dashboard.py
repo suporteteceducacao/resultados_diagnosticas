@@ -28,7 +28,7 @@ def load_data(file_path):
 
 # Carregamento dos dados
 try:
-    df_login = load_data('senhas_acesso.xlsx')
+    df_login = load_data('Resultados_diagnosticas/xls/senhas_acesso.xlsx')
     df_dados = load_data('Resultados_diagnosticas/xls/bd_dados.xlsx')
     df_ama = load_data('Resultados_diagnosticas/xls/bd_ama.xlsx')  # Carrega a nova tabela de alfabetização
     
