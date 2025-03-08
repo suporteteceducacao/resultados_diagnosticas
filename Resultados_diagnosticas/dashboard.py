@@ -415,30 +415,42 @@ if st.session_state.login_success:
     if df_escola.empty:
         st.warning("Não há dados disponíveis para esta escola.")
    
+       # ... (código original anterior)
+
+    if df_escola.empty:
+        st.warning("Não há dados disponíveis para esta escola.")
+    else:
+        # Cria três abas: uma para os resultados das avaliações, outra para a alfabetização e outra para a região
+        tab1, tab2, tab3 = st.tabs(["AVALIAÇÃO DIAGNÓSTICA MUNICIPAL", "AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO", "REGIAO"])
+
+        with tab1:
+            # ... (código original da aba AVALIAÇÃO DIAGNÓSTICA MUNICIPAL)
+
+        with tab2:
+            # ... (código original da aba AVALIAÇÃO MUNICIPAL DE ALFABETIZAÇÃO)
+
         with tab3:
             # Nova aba REGIAO
             st.subheader("Desempenho Médio por Região e Edição")
 
-            # Seletor de ETAPA, COMPONENTE CURRICULAR e REGIAO na mesma linha
-            col1, col2, col3 = st.columns(3)
+            # Seletor de ETAPA e COMPONENTE CURRICULAR na mesma linha
+            col1, col2 = st.columns(2)
             with col1:
                 etapa_selecionada_regiao = st.selectbox("Selecione a ETAPA", etapas, key="etapa_selectbox_regiao")
             with col2:
                 componente_selecionado_regiao = st.selectbox("Selecione o COMPONENTE CURRICULAR", componentes, key="componente_selectbox_regiao")
-            with col3:
-                # Seletor de REGIAO
-                regioes_disponiveis = df_escola['REGIAO'].unique().tolist()
-                regioes_disponiveis.insert(0, 'TODAS')  # Adiciona a opção "TODAS"
-                regiao_selecionada = st.selectbox("Selecione a REGIAO", regioes_disponiveis, key="regiao_selectbox")
 
-            # Filtrar os dados conforme a seleção de ETAPA, COMPONENTE CURRICULAR e REGIAO
-            if etapa_selecionada_regiao == 'TODAS' and componente_selecionado_regiao == 'TODOS' and regiao_selecionada == 'TODAS':
+            # Filtrar os dados conforme a seleção de ETAPA e COMPONENTE CURRICULAR
+            if etapa_selecionada_regiao == 'TODAS' and componente_selecionado_regiao == 'TODOS':
                 df_filtrado_regiao = df_escola.copy()
+            elif etapa_selecionada_regiao == 'TODAS':
+                df_filtrado_regiao = df_escola[df_escola['COMP_CURRICULAR'] == componente_selecionado_regiao]
+            elif componente_selecionado_regiao == 'TODOS':
+                df_filtrado_regiao = df_escola[df_escola['ETAPA'] == etapa_selecionada_regiao]
             else:
                 df_filtrado_regiao = df_escola[
-                    (df_escola['ETAPA'] == etapa_selecionada_regiao if etapa_selecionada_regiao != 'TODAS' else True) &
-                    (df_escola['COMP_CURRICULAR'] == componente_selecionado_regiao if componente_selecionado_regiao != 'TODOS' else True) &
-                    (df_escola['REGIAO'] == regiao_selecionada if regiao_selecionada != 'TODAS' else True)
+                    (df_escola['ETAPA'] == etapa_selecionada_regiao) &
+                    (df_escola['COMP_CURRICULAR'] == componente_selecionado_regiao)
                 ]
 
             # Calcular o desempenho médio por região e edição
@@ -446,7 +458,7 @@ if st.session_state.login_success:
 
             if not df_regiao_edicao.empty:
                 # Configuração do gráfico de barras agrupadas por região e edição
-                fig_regiao_edicao, ax_regiao_edicao = plt.subplots(figsize=(14, 8))
+                fig_regiao_edicao, ax_regiao_edicao = plt.subplots(figsize=(12, 6))
 
                 # Obter as regiões e edições únicas
                 regioes = df_regiao_edicao['REGIAO'].unique()
@@ -456,8 +468,8 @@ if st.session_state.login_success:
                 largura_barra = 0.15
                 posicoes = range(len(edicoes))
 
-                # Cores para as barras (usando uma paleta de cores mais vibrante)
-                cores = plt.cm.get_cmap('viridis', len(regioes))  # Paleta de cores vibrantes
+                # Cores para as barras
+                cores = plt.cm.get_cmap('tab20', len(regioes))  # Paleta de cores para as regiões
 
                 # Plotar as barras para cada região
                 for i, regiao in enumerate(regioes):
@@ -466,8 +478,7 @@ if st.session_state.login_success:
                         [p + i * largura_barra for p in posicoes],  # Posições das barras
                         dados_regiao['DESEMPENHO_MEDIO'],  # Valores do desempenho médio
                         width=largura_barra,  # Largura das barras
-                        label=regiao,  # Rótulo da região
-                        color=cores(i)  # Cor da região
+                        label=regiao  # Rótulo da região
                     )
 
                     # Adicionar rótulos de desempenho médio nas barras
@@ -480,32 +491,18 @@ if st.session_state.login_success:
                             ha='center',  # Alinhamento horizontal
                             va='bottom',  # Alinhamento vertical
                             color='black',  # Cor do rótulo
-                            fontsize=10  # Tamanho da fonte
+                            fontsize=8  # Tamanho da fonte
                         )
 
                 # Configuração dos rótulos dos eixos
-                ax_regiao_edicao.set_xlabel('Edição', color='blue', fontsize=14, fontweight='bold')  # Rótulo do eixo X
-                ax_regiao_edicao.set_ylabel('Desempenho Médio', color='blue', fontsize=14, fontweight='bold')  # Rótulo do eixo Y
+                ax_regiao_edicao.set_xlabel('Edição', color='blue', fontsize=12)  # Rótulo do eixo X
+                ax_regiao_edicao.set_ylabel('Desempenho Médio', color='blue', fontsize=12)  # Rótulo do eixo Y
                 ax_regiao_edicao.set_xticks([p + largura_barra * (len(regioes) - 1) / 2 for p in posicoes])
-                ax_regiao_edicao.set_xticklabels(edicoes, rotation=45, color='blue', fontsize=12)
-                ax_regiao_edicao.tick_params(axis='y', colors='blue', labelsize=12)
-
-                # Adicionar título ao gráfico
-                ax_regiao_edicao.set_title(
-                    f"Desempenho Médio por Região e Edição - {etapa_selecionada_regiao} - {componente_selecionado_regiao}",
-                    fontsize=16,  # Tamanho da fonte
-                    fontweight='bold',  # Negrito
-                    pad=20  # Espaçamento entre o título e o gráfico
-                )
+                ax_regiao_edicao.set_xticklabels(edicoes, rotation=45, color='blue', fontsize=10)
+                ax_regiao_edicao.tick_params(axis='y', colors='blue', labelsize=10)
 
                 # Adicionar legenda
-                ax_regiao_edicao.legend(
-                    title='Região',
-                    bbox_to_anchor=(1.05, 1),
-                    loc='upper left',
-                    fontsize=12,
-                    title_fontsize=14
-                )
+                ax_regiao_edicao.legend(title='Região', bbox_to_anchor=(1.05, 1), loc='upper left')
 
                 # Adicionar grid para melhorar a visualização
                 ax_regiao_edicao.grid(axis='y', linestyle='--', alpha=0.7)
@@ -530,6 +527,5 @@ if st.session_state.login_success:
                 st.warning("Não há dados disponíveis para a região e edição selecionadas.")
 
 # ... (código original posterior)
-
 else:
     st.info("Por favor, faça login para acessar os dados.")
