@@ -416,20 +416,5 @@ if st.session_state.login_success:
                 st.warning("Não há dados disponíveis para o percentual de alfabetização.")
             # ... (código original anterior)
 
-    if df_escola.empty:
-        st.warning("Não há dados disponíveis para esta escola.")
-   
-       # ... (código original anterior)
-
-    if df_escola.empty:
-        st.warning("Não há dados disponíveis para esta escola.")
-    else:
-        
-        with tab3:
-            if()
-            else:
-                st.warning("Não há dados disponíveis para a região e edição selecionadas.")
-
-# ... (código original posterior)
 else:
     st.info("Por favor, faça login para acessar os dados.")
