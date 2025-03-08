@@ -320,78 +320,107 @@ if st.session_state.login_success:
                 
                 # ... (código original anterior)
 
-# Inicialização do session_state
-if 'escola_logada' not in st.session_state:
-    st.session_state.escola_logada = None  # Inicializa como None
-
-# Exibir gráfico de desempenho médio por edição
-if st.session_state.escola_logada == 'TODAS' or st.session_state.escola_logada is not None:
-    if st.session_state.escola_logada == 'TODAS':
-        # INEP mestre: mostra todas as edições
-        df_edicao = df_filtrado.groupby('EDIÇÃO')['DESEMPENHO_MEDIO'].mean().reset_index()
-        titulo_grafico = "Desempenho Médio por Edição (Todas as Edições)"
-    else:
-        # Escola logada: mostra apenas as edições da região da escola logada
-        regiao_escola = df_dados[df_dados['INEP'] == st.session_state.escola_logada]['REGIAO'].iloc[0]
-        df_edicao = df_filtrado[df_filtrado['REGIAO'] == regiao_escola].groupby('EDIÇÃO')['DESEMPENHO_MEDIO'].mean().reset_index()
-        titulo_grafico = f"Desempenho Médio por Edição (Região: {regiao_escola})"
-
-    if not df_edicao.empty:
-        st.subheader(titulo_grafico)
-
-        # Configuração do gráfico de barras
-        fig_edicao, ax_edicao = plt.subplots(figsize=(10, 6))
-
-        # Adicionar título dentro da figura
-        ax_edicao.set_title(titulo_grafico, fontsize=14, fontweight='bold', pad=20)  # Título dentro do gráfico
-
-        # Cores para as barras (usando uma única cor)
-        cor_unica = 'blue'  # Ou 'green' para verde
-
-        # Plotar as barras para cada edição
-        barras_edicao = ax_edicao.bar(df_edicao['EDIÇÃO'], df_edicao['DESEMPENHO_MEDIO'], color=cor_unica)
-
-        # Adicionar rótulos de desempenho médio nas barras
-        for barra in barras_edicao:
-            altura = barra.get_height()
-            ax_edicao.text(
-                barra.get_x() + barra.get_width() / 2,  # Posição X do rótulo
-                altura + 0.05,  # Posição Y do rótulo (acima da barra)
-                f'{altura:.2f}',  # Valor do desempenho médio
-                ha='center',  # Alinhamento horizontal
-                va='bottom',  # Alinhamento vertical
-                color='black',  # Cor do rótulo
-                fontsize=14  # Tamanho da fonte
-            )
-
-        # Configuração dos rótulos dos eixos
-        ax_edicao.set_xlabel('Edição', color='blue', fontsize=14, fontweight='bold')  # Rótulo do eixo X
-        ax_edicao.set_ylabel('Desempenho Médio', color='blue', fontsize=14, fontweight='bold')  # Rótulo do eixo Y
-        ax_edicao.tick_params(axis='x', colors='blue', labelsize=12, rotation=45)  # Configuração dos ticks do eixo X
-        ax_edicao.tick_params(axis='y', colors='blue', labelsize=12)  # Configuração dos ticks do eixo Y
-
-        # Adicionar grid para melhorar a visualização
-        ax_edicao.grid(axis='y', linestyle='--', alpha=0.7)
-
-        # Ajustar o layout para evitar cortes
-        plt.tight_layout()
-
-        # Exibir o gráfico
-        st.pyplot(fig_edicao)
-
-        # Botão de download do gráfico
-        buf_edicao = io.BytesIO()
-        fig_edicao.savefig(buf_edicao, format='png', dpi=300, bbox_inches='tight')
-        buf_edicao.seek(0)
-        st.download_button(
-            label="Baixar Gráfico (PNG)",
-            data=buf_edicao,
-            file_name="grafico_desempenho_edicao.png",
-            mime="image/png"
-        )
-    else:
-        st.warning("Não há dados disponíveis para as edições selecionadas.")
-
+        # Exibir gráfico de desempenho médio por região e por edição
+        if etapa_selecionada != 'TODAS' and componente_selecionado != 'TODOS':
+            if st.session_state.escola_logada == 'TODAS':
+                # INEP mestre: mostra todas as regiões
+                df_regiao_edicao = df_filtrado.groupby(['REGIAO', 'EDIÇÃO'])['DESEMPENHO_MEDIO'].mean().reset_index()
+                titulo_grafico = "Desempenho Médio por Região e Edição (Todas as Regiões)"
+            else:
+                # Escola logada: mostra apenas a região da escola logada
+                try:
+                    # Verifica se a coluna 'REGIAO' existe no DataFrame
+                    if 'REGIAO' in df_dados.columns:
+                        regiao_escola = df_dados[df_dados['INEP'] == st.session_state.escola_logada]['REGIAO'].iloc[0]
+                        df_regiao_edicao = df_filtrado[df_filtrado['REGIAO'] == regiao_escola].groupby(['REGIAO', 'EDIÇÃO'])['DESEMPENHO_MEDIO'].mean().reset_index()
+                        titulo_grafico = f"Desempenho Médio por Região e Edição (Região: {regiao_escola})"
+                    else:
+                        st.error("A coluna 'REGIAO' não foi encontrada no DataFrame.")
+                        st.stop()
+                except IndexError:
+                    st.error("Não foi possível encontrar a região da escola logada. Verifique os dados.")
+                    st.stop()
+        
+            if not df_regiao_edicao.empty:
+                st.subheader(titulo_grafico)
+        
+                # Configuração do gráfico de barras agrupadas por região e edição
+                fig_regiao_edicao, ax_regiao_edicao = plt.subplots(figsize=(12, 6))
+        
+                # Obter as regiões e edições únicas
+                regioes = df_regiao_edicao['REGIAO'].unique()
+                edicoes = df_regiao_edicao['EDIÇÃO'].unique()
+        
+                # Largura das barras
+                largura_barra = 0.15
+                posicoes = range(len(edicoes))
+        
+                # Cores para as barras
+                cores = plt.cm.get_cmap('tab20', len(regioes))  # Paleta de cores para as regiões
+        
+                # Plotar as barras para cada região
+                for i, regiao in enumerate(regioes):
+                    dados_regiao = df_regiao_edicao[df_regiao_edicao['REGIAO'] == regiao]
+                    barras = ax_regiao_edicao.bar(
+                        [p + i * largura_barra for p in posicoes],  # Posições das barras
+                        dados_regiao['DESEMPENHO_MEDIO'],  # Valores do desempenho médio
+                        width=largura_barra,  # Largura das barras
+                        label=regiao  # Rótulo da região
+                    )
+        
+                    # Adicionar rótulos de desempenho médio nas barras
+                    for barra in barras:
+                        altura = barra.get_height()
+                        ax_regiao_edicao.text(
+                            barra.get_x() + barra.get_width() / 2,  # Posição X do rótulo
+                            altura + 0.05,  # Posição Y do rótulo (acima da barra)
+                            f'{altura:.2f}',  # Valor do desempenho médio
+                            ha='center',  # Alinhamento horizontal
+                            va='bottom',  # Alinhamento vertical
+                            color='black',  # Cor do rótulo
+                            fontsize=8  # Tamanho da fonte
+                        )
+        
+                # Configuração dos rótulos dos eixos
+                ax_regiao_edicao.set_xlabel('Edição', color='blue', fontsize=12)  # Rótulo do eixo X
+                ax_regiao_edicao.set_ylabel('Desempenho Médio', color='blue', fontsize=12)  # Rótulo do eixo Y
+                ax_regiao_edicao.set_xticks([p + largura_barra * (len(regioes) - 1) / 2 for p in posicoes])
+                ax_regiao_edicao.set_xticklabels(edicoes, rotation=45, color='blue', fontsize=10)
+                ax_regiao_edicao.tick_params(axis='y', colors='blue', labelsize=10)
+        
+                # Adicionar legenda informando a região (apenas para escola logada)
+                if st.session_state.escola_logada != 'TODAS':
+                    ax_regiao_edicao.annotate(
+                        f"Região: {regiao_escola}",
+                        xy=(0.5, 1.05),  # Posição do texto (acima do gráfico)
+                        xycoords='axes fraction',
+                        ha='center',  # Alinhamento horizontal
+                        va='bottom',  # Alinhamento vertical
+                        fontsize=12,  # Tamanho da fonte
+                        color='blue'  # Cor do texto
+                    )
+        
+                # Adicionar grid para melhorar a visualização
+                ax_regiao_edicao.grid(axis='y', linestyle='--', alpha=0.7)
+        
+                # Ajustar o layout para evitar cortes
+                plt.tight_layout()
+        
+                # Exibir o gráfico
+                st.pyplot(fig_regiao_edicao)
+        
+                # Botão de download do gráfico
+                buf_regiao_edicao = io.BytesIO()
+                fig_regiao_edicao.savefig(buf_regiao_edicao, format='png', dpi=300, bbox_inches='tight')
+                buf_regiao_edicao.seek(0)
+                st.download_button(
+                    label="Baixar Gráfico (PNG)",
+                    data=buf_regiao_edicao,
+                    file_name="grafico_desempenho_regiao_edicao.png",
+                    mime="image/png"
+                )
+            else:
+                st.warning("Não há dados disponíveis para a região e edição selecionadas.")
         with tab2:
             # Exibir resultados da tabela de alfabetização
             st.subheader("Percentual de Alfabetização")
