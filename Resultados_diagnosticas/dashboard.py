@@ -30,7 +30,7 @@ def load_data(file_path):
 
 # Carregamento dos dados
 try:
-    df_login = load_data('Resultados_diagnosticas/xls/senhas_acesso.xlsx')
+    df_login = load_data('senhas_acesso.xlsx')
     df_dados = load_data('Resultados_diagnosticas/xls/bd_dados.xlsx')
     df_ama = load_data('Resultados_diagnosticas/xls/bd_ama.xlsx')  # Carrega a nova tabela de alfabetização
     
@@ -428,13 +428,13 @@ if st.session_state.login_success:
         with tab3:
             # Nova aba REGIAO
             st.subheader("Desempenho Médio por Região e Edição")
-        
+
             # Verificar se é o INEP mestre
             if 'escola_logada' in st.session_state:
                 is_inep_mestre = st.session_state.escola_logada == 'TODAS'  # INEP mestre é identificado como 'TODAS'
             else:
                 is_inep_mestre = False  # Caso contrário, não é o INEP mestre
-        
+
             if is_inep_mestre:
                 # Se for o INEP mestre, mostrar seletor de REGIÃO
                 col1, col2, col3 = st.columns(3)
@@ -453,7 +453,7 @@ if st.session_state.login_success:
                     regioes_disponiveis = [str(regiao) for regiao in regioes_disponiveis]
                     
                     regiao_selecionada = st.selectbox("Selecione a REGIAO", sorted(regioes_disponiveis), key="regiao_selectbox_tab3_mestre")
-        
+
                 # Filtrar os dados conforme a seleção de ETAPA, COMPONENTE CURRICULAR e REGIAO
                 if etapa_selecionada_regiao == 'TODAS' and componente_selecionado_regiao == 'TODOS' and regiao_selecionada == 'TODAS':
                     df_filtrado_regiao = df_escola.copy()
@@ -463,30 +463,30 @@ if st.session_state.login_success:
                         (df_escola['COMP_CURRICULAR'] == componente_selecionado_regiao if componente_selecionado_regiao != 'TODOS' else True) &
                         (df_escola['REGIAO'] == regiao_selecionada if regiao_selecionada != 'TODAS' else True)
                     ]
-        
+
                 # Calcular o desempenho médio por região, etapa, componente curricular e edição
                 df_regiao_edicao = df_filtrado_regiao.groupby(
                     ['REGIAO', 'ETAPA', 'COMP_CURRICULAR', 'EDIÇÃO']
                 )['DESEMPENHO_MEDIO'].mean().reset_index()
-        
+
                 # Ordenar as edições em ordem crescente
                 df_regiao_edicao = df_regiao_edicao.sort_values(by='EDIÇÃO')
-        
+
                 if not df_regiao_edicao.empty:
                     # Configuração do gráfico de barras agrupadas por região e edição
                     fig_regiao_edicao, ax_regiao_edicao = plt.subplots(figsize=(14, 8))  # Aumentar o tamanho do gráfico
-        
+
                     # Obter as regiões e edições únicas
                     regioes = df_regiao_edicao['REGIAO'].unique()
                     edicoes = df_regiao_edicao['EDIÇÃO'].unique()
-        
+
                     # Largura das barras
                     largura_barra = 0.75
                     posicoes = np.arange(len(edicoes))  # Usar numpy para criar posições
-        
+
                     # Cores para as barras (usando tons de azul)
                     cores = plt.cm.Blues(np.linspace(0.4, 1, len(regioes)))  # Tons de azul
-        
+
                     # Plotar as barras para cada região
                     for i, regiao in enumerate(regioes):
                         dados_regiao = df_regiao_edicao[df_regiao_edicao['REGIAO'] == regiao]
@@ -500,7 +500,7 @@ if st.session_state.login_success:
                             label=regiao,  # Rótulo da região
                             color=cores[i]  # Cor da região
                         )
-        
+
                         # Adicionar rótulos de desempenho médio nas barras
                         for barra, valor in zip(barras, desempenho_medio):
                             altura = barra.get_height()
@@ -513,14 +513,14 @@ if st.session_state.login_success:
                                 color='black',  # Cor do rótulo
                                 fontsize=16  # Aumentar o tamanho da fonte dos rótulos
                             )
-        
+
                     # Configuração dos rótulos dos eixos
                     ax_regiao_edicao.set_xlabel('Edição', color='blue', fontsize=14, fontweight='bold')  # Aumentar o tamanho da fonte
                     ax_regiao_edicao.set_ylabel('Desempenho Médio', color='blue', fontsize=14, fontweight='bold')  # Aumentar o tamanho da fonte
                     ax_regiao_edicao.set_xticks(posicoes + largura_barra * (len(regioes) - 1) / 2)
                     ax_regiao_edicao.set_xticklabels(edicoes, rotation=45, color='blue', fontsize=12)  # Aumentar o tamanho da fonte
                     ax_regiao_edicao.tick_params(axis='y', colors='blue', labelsize=12)  # Aumentar o tamanho da fonte
-        
+
                     # Adicionar título ao gráfico
                     ax_regiao_edicao.set_title(
                         f"Desempenho Médio por Região e Edição - {etapa_selecionada_regiao} - {componente_selecionado_regiao}",
@@ -528,7 +528,7 @@ if st.session_state.login_success:
                         fontweight='bold',  # Negrito
                         pad=20  # Espaçamento entre o título e o gráfico
                     )
-        
+
                     # Adicionar legenda
                     ax_regiao_edicao.legend(
                         title='Região',
@@ -537,16 +537,16 @@ if st.session_state.login_success:
                         fontsize=12,  # Aumentar o tamanho da fonte da legenda
                         title_fontsize=14  # Aumentar o tamanho da fonte do título da legenda
                     )
-        
+
                     # Adicionar grid para melhorar a visualização
                     ax_regiao_edicao.grid(axis='y', linestyle='--', alpha=0.7)
-        
+
                     # Ajustar o layout para evitar cortes
                     plt.tight_layout()
-        
+
                     # Exibir o gráfico
                     st.pyplot(fig_regiao_edicao)
-        
+
                     # Botão de download do gráfico
                     buf_regiao_edicao = BytesIO()
                     fig_regiao_edicao.savefig(buf_regiao_edicao, format='png', dpi=300, bbox_inches='tight')
@@ -557,7 +557,7 @@ if st.session_state.login_success:
                         file_name="grafico_desempenho_regiao_edicao.png",
                         mime="image/png"
                     )
-        
+
                 else:
                     st.warning("Não há dados disponíveis para a região e edição selecionadas.")
             else:
